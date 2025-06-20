@@ -5,6 +5,10 @@ import { useApp } from '../contexts/AppContext';
 import { APIEndpoint, CertificateTemplate, CertificateElement } from '../types';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const CertificatePreview: React.FC<{ template: CertificateTemplate, variables: Record<string, string> }> = ({ template, variables }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -373,7 +377,7 @@ const APITester = () => {
 
       const result = await response.json();
       setResult(result);
-    } catch (error) {
+    } catch (error: any) {
       setResult({ error: error.message });
     } finally {
       setLoading(false);
