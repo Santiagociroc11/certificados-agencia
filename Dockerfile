@@ -28,6 +28,9 @@ RUN apk add --no-cache udev ttf-freefont chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
+# Set the public URL for the application, can be overridden by Easypanel
+ENV PUBLIC_BASE_URL="http://localhost:3001"
+
 # Copy dependency definitions
 COPY --from=builder /app/package.json /app/package-lock.json ./
 

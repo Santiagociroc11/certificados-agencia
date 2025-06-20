@@ -82,6 +82,7 @@ const CertificatePreview: React.FC<{ template: CertificateTemplate, variables: R
 
 const APIDocumentation = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const baseUrl = typeof window !== 'undefined' ? `${window.location.origin}/api` : 'http://localhost:3001/api';
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -120,7 +121,7 @@ const APIDocumentation = () => {
 
           <div className="bg-blue-50 p-4 rounded-lg">
             <h4 className="font-semibold text-blue-800">Base URL</h4>
-            <code className="bg-blue-100 px-2 py-1 rounded text-sm">http://localhost:3001/api</code>
+            <code className="bg-blue-100 px-2 py-1 rounded text-sm">{baseUrl}</code>
           </div>
 
           <div className="bg-green-50 p-4 rounded-lg">
@@ -140,7 +141,7 @@ const APIDocumentation = () => {
           <div className="border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-mono">POST</span>
-              <code className="text-sm">/api/certificates/generate</code>
+              <code className="text-sm">/certificates/generate</code>
             </div>
             <p className="text-gray-600 mb-3">Genera un certificado desde una plantilla con datos dinámicos</p>
             
@@ -216,14 +217,14 @@ const APIDocumentation = () => {
               <div>
                 <h5 className="font-medium text-gray-700 mb-1">1️⃣ Primero, obtén las variables de la plantilla:</h5>
                 <div className="bg-gray-900 text-blue-300 p-3 rounded-lg text-sm overflow-x-auto">
-                  <pre>{`curl -X GET http://localhost:3001/api/templates/template-formal-classic/variables`}</pre>
+                  <pre>{`curl -X GET ${baseUrl}/templates/template-formal-classic/variables`}</pre>
                 </div>
               </div>
               
               <div>
                 <h5 className="font-medium text-gray-700 mb-1">2️⃣ Luego, genera el certificado con los datos dinámicos:</h5>
                 <div className="bg-gray-900 text-green-400 p-3 rounded-lg text-sm overflow-x-auto">
-                  <pre>{`curl -X POST http://localhost:3001/api/certificates/generate \\
+                  <pre>{`curl -X POST ${baseUrl}/certificates/generate \\
   -H "Content-Type: application/json" \\
   -d '{
     "template_id": "template-formal-classic",
@@ -244,7 +245,7 @@ const APIDocumentation = () => {
             <div className="bg-gray-900 text-blue-300 p-4 rounded-lg text-sm overflow-x-auto">
               <pre>{`// 1. Obtener variables de la plantilla
 const variablesResponse = await fetch(
-  'http://localhost:3001/api/templates/template-formal-classic/variables'
+  '${baseUrl}/templates/template-formal-classic/variables'
 );
 const { variables } = await variablesResponse.json();
 console.log('Variables requeridas:', variables);
@@ -269,7 +270,7 @@ variables.forEach(variable => {
 });
 
 // 3. Generar certificado
-const response = await fetch('http://localhost:3001/api/certificates/generate', {
+const response = await fetch('${baseUrl}/certificates/generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -296,6 +297,7 @@ const APITester = () => {
   const [templateVariables, setTemplateVariables] = useState<string[]>([]);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
 
   // Fetch template variables when template is selected
   useEffect(() => {
@@ -309,7 +311,7 @@ const APITester = () => {
 
   const fetchTemplateVariables = async (templateId: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/templates/${templateId}/variables`);
+      const response = await fetch(`${baseUrl}/api/templates/${templateId}/variables`);
       if (response.ok) {
         const data = await response.json();
         setTemplateVariables(data.variables || []);
@@ -350,22 +352,22 @@ const APITester = () => {
 
   const handleTest = async () => {
     if (!selectedTemplateId) {
-      alert('Selecciona una plantilla primero');
+      alert('Por favor, selecciona una plantilla');
       return;
     }
 
     setLoading(true);
+    setResult(null);
+
     try {
-      const data = JSON.parse(testData);
-      const response = await fetch('http://localhost:3001/api/certificates/generate', {
+      const parsedData = JSON.parse(testData);
+      const response = await fetch(`${baseUrl}/api/certificates/generate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           template_id: selectedTemplateId,
-          data: data,
-          recipient_name: data.nombre_completo || 'Prueba'
+          data: parsedData,
+          recipient_name: parsedData.nombre_completo || 'Prueba'
         })
       });
 

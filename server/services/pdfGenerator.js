@@ -70,13 +70,15 @@ export async function generateCertificatePDF(template, data, certificateId) {
         
         await page.pdf({
             path: filePath,
-            width: '794px', // Match viewport width
-            height: '561px', // Match viewport height
+            width: '794px',
+            height: '561px',
             printBackground: true,
-            pageRanges: '1',
+            pageRanges: '1'
         });
 
-        const downloadUrl = `${PUBLIC_BASE_URL}/certificates/${filename}`;
+        // Use environment variable for the base URL, with a fallback for local dev
+        const publicBaseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3001';
+        const downloadUrl = `${publicBaseUrl}/certificates/${filename}`;
 
         return {
             filePath,
