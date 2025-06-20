@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
-import { fabric } from 'fabric';
+import fabric from 'fabric';
 import { Grid, AlignCenter, AlignLeft, AlignRight, AlignJustify, Move } from 'lucide-react';
 
 interface EditorCanvasProps {
