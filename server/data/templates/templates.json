@@ -1,0 +1,75 @@
+[
+  {
+    "name": "PLANTILLA CURSOS",
+    "description": "Descripción de la plantilla",
+    "elements": [
+      {
+        "id": "element-1750436465387",
+        "type": "text",
+        "content": "{nombre_completo}",
+        "position": {
+          "x": 190.00275509200043,
+          "y": 237.00130209239987
+        },
+        "size": {
+          "width": 413.01301780970186,
+          "height": 46.199999999999996
+        },
+        "style": {
+          "fontSize": 40,
+          "fontFamily": "Times New Roman",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "#000000",
+          "textAlign": "center",
+          "lineHeight": 1.2,
+          "letterSpacing": 0
+        }
+      },
+      {
+        "id": "element-1750440184652",
+        "type": "text",
+        "content": "{nombre_producto}",
+        "position": {
+          "x": 160.00705500344395,
+          "y": 330.0019496570692
+        },
+        "size": {
+          "width": 475.0093476335727,
+          "height": 32.63999999999999
+        },
+        "style": {
+          "fontSize": 28,
+          "fontFamily": "Poppins",
+          "fontWeight": "bold",
+          "fontStyle": "normal",
+          "color": "#000000",
+          "textAlign": "center",
+          "lineHeight": 1.16,
+          "letterSpacing": 0
+        }
+      },
+      {
+        "id": "element-1750440215116",
+        "type": "image",
+        "content": "https://i.imgur.com/97hiQrT.png",
+        "position": {
+          "x": 535.0085604644299,
+          "y": 459.6530070376684
+        },
+        "size": {
+          "width": 218.36690279494536,
+          "height": 54.34909580674196
+        },
+        "style": {
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "rgb(0,0,0)"
+        }
+      }
+    ],
+    "backgroundUrl": "https://i.imgur.com/dzuQNgm.png",
+    "backgroundColor": "",
+    "id": "template-1750436089256"
+  }
+]

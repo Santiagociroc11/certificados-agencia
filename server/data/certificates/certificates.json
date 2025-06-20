@@ -1,0 +1,74 @@
+[
+  {
+    "id": "700968be-3edc-4e98-abf2-cde711019d43",
+    "templateId": "template-formal-classic",
+    "recipientName": "Mar�a Garc�a",
+    "data": {
+      "nombre_completo": "Mar�a Garc�a",
+      "fecha_del_evento": "20 de Enero, 2024",
+      "nombre_del_evento": "Curso de Node.js"
+    },
+    "generatedAt": "2025-06-20T16:13:11.207Z",
+    "validationCode": "4EAD574A",
+    "status": "generated",
+    "downloadUrl": "http://localhost:3001/certificates/certificate_700968be-3edc-4e98-abf2-cde711019d43.pdf",
+    "filePath": "C:\\Users\\sanci.DESKTOP-C02P3NU\\Desktop\\PROYECTOS\\CERTIFICADOS\\project\\server\\generated\\certificate_700968be-3edc-4e98-abf2-cde711019d43.pdf"
+  },
+  {
+    "id": "a707c9ac-c4c4-4638-ba9b-5558823e4f28",
+    "templateId": "template-formal-classic",
+    "recipientName": "María García",
+    "data": {
+      "nombre_completo": "María García",
+      "nombre_del_evento": "Curso de Node.js",
+      "fecha_del_evento": "20 de Enero, 2024"
+    },
+    "generatedAt": "2025-06-20T16:13:25.260Z",
+    "validationCode": "F04EFA27",
+    "status": "generated",
+    "downloadUrl": "http://localhost:3001/certificates/certificate_a707c9ac-c4c4-4638-ba9b-5558823e4f28.pdf",
+    "filePath": "C:\\Users\\sanci.DESKTOP-C02P3NU\\Desktop\\PROYECTOS\\CERTIFICADOS\\project\\server\\generated\\certificate_a707c9ac-c4c4-4638-ba9b-5558823e4f28.pdf"
+  },
+  {
+    "id": "805b42f1-fe8d-4357-86bd-8620457ee53d",
+    "templateId": "template-1750436089256",
+    "recipientName": "Juan Pérez",
+    "data": {
+      "nombre_completo": "Juan Pérez",
+      "nombre_producto": "Valor para nombre_producto"
+    },
+    "generatedAt": "2025-06-20T17:26:49.479Z",
+    "validationCode": "AB6AA7CD",
+    "status": "generated",
+    "downloadUrl": "http://localhost:3001/certificates/certificate_805b42f1-fe8d-4357-86bd-8620457ee53d.pdf",
+    "filePath": "C:\\Users\\sanci.DESKTOP-C02P3NU\\Desktop\\PROYECTOS\\CERTIFICADOS\\project\\server\\generated\\certificate_805b42f1-fe8d-4357-86bd-8620457ee53d.pdf"
+  },
+  {
+    "id": "8c923127-2076-4f0c-937d-ca8372799017",
+    "templateId": "template-1750436089256",
+    "recipientName": "Juan Pérez",
+    "data": {
+      "nombre_completo": "Juan Pérez",
+      "nombre_producto": "Valor para nombre_producto"
+    },
+    "generatedAt": "2025-06-20T17:29:41.814Z",
+    "validationCode": "28016D20",
+    "status": "generated",
+    "downloadUrl": "http://localhost:3001/certificates/certificate_8c923127-2076-4f0c-937d-ca8372799017.pdf",
+    "filePath": "C:\\Users\\sanci.DESKTOP-C02P3NU\\Desktop\\PROYECTOS\\CERTIFICADOS\\project\\server\\generated\\certificate_8c923127-2076-4f0c-937d-ca8372799017.pdf"
+  },
+  {
+    "id": "340e0b5d-139d-4ad3-93ce-1d2aa8455bf8",
+    "templateId": "template-1750436089256",
+    "recipientName": "Juan Pérez",
+    "data": {
+      "nombre_completo": "Juan Pérez",
+      "nombre_producto": "Valor para nombre_producto"
+    },
+    "generatedAt": "2025-06-20T17:32:37.885Z",
+    "validationCode": "EA550A1E",
+    "status": "generated",
+    "downloadUrl": "http://localhost:3001/certificates/certificate_340e0b5d-139d-4ad3-93ce-1d2aa8455bf8.pdf",
+    "filePath": "C:\\Users\\sanci.DESKTOP-C02P3NU\\Desktop\\PROYECTOS\\CERTIFICADOS\\project\\server\\generated\\certificate_340e0b5d-139d-4ad3-93ce-1d2aa8455bf8.pdf"
+  }
+]
