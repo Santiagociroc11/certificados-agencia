@@ -2,9 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 import certificateRoutes from './routes/certificates.js';
 import templateRoutes from './routes/templates.js';
 import { initializeBrowser, closeBrowser } from './services/pdfGenerator.js';
+
+// Cargar variables de entorno del archivo .env en la raíz del proyecto
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.env') });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
