@@ -187,16 +187,14 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
         const width = element.size?.width || element.width || 100;
         const height = element.size?.height || element.height || 30;
         
-        // Apply a small adjustment for text elements to better match canvas positioning
-        const fontSize = element.style?.fontSize || element.fontSize || 16;
-        const adjustedY = element.type === 'text' ? y - (fontSize * 0.15) : y;
+
         
         const style = element.style || {};
-        // For text elements, we need to handle positioning more precisely
-        let elementStyles = `
+        // Use exact positioning without flexbox to match canvas behavior
+        const styles = `
             position: absolute;
             left: ${x}px;
-            top: ${adjustedY}px;
+            top: ${y}px;
             width: ${width}px;
             height: ${height}px;
             font-family: '${style.fontFamily || element.fontFamily || 'Arial'}', sans-serif;
@@ -211,30 +209,14 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
             transform: rotate(${element.angle || 0}deg);
             transform-origin: center center;
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            ${element.type === 'image' ? 'object-fit: cover;' : ''}
         `;
-
-        // Different positioning strategy for text vs images
-        if (element.type === 'text') {
-            // For text, use flexbox but adjust the positioning to match canvas behavior
-            elementStyles += `
-                display: flex;
-                align-items: flex-start;
-                justify-content: ${style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start'};
-            `;
-        } else {
-            // For images, use standard flexbox centering
-            elementStyles += `
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            `;
-        }
-
-        const styles = elementStyles;
 
         if (element.type === 'image') {
             const src = element.content || element.src || '';
-            return `<img src="${src}" style="${styles} object-fit: cover;" />`;
+            return `<img src="${src}" style="${styles}" />`;
         }
         
         return `<div style="${styles}">${content}</div>`;
