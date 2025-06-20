@@ -82,7 +82,17 @@ const CertificatePreview: React.FC<{ template: CertificateTemplate, variables: R
 
 const APIDocumentation = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const baseUrl = typeof window !== 'undefined' ? `${window.location.origin}/api` : 'http://localhost:3001/api';
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/api`;
+    }
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (!apiBaseUrl) {
+      throw new Error('VITE_API_BASE_URL environment variable is not configured');
+    }
+    return `${apiBaseUrl}api`;
+  };
+  const baseUrl = getBaseUrl();
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -297,7 +307,17 @@ const APITester = () => {
   const [templateVariables, setTemplateVariables] = useState<string[]>([]);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (!apiBaseUrl) {
+      throw new Error('VITE_API_BASE_URL environment variable is not configured');
+    }
+    return apiBaseUrl.replace(/\/$/, '');
+  };
+  const baseUrl = getBaseUrl();
 
   // Fetch template variables when template is selected
   useEffect(() => {
@@ -374,7 +394,7 @@ const APITester = () => {
       const result = await response.json();
       setResult(result);
     } catch (error) {
-      setResult({ error: error.message });
+      setResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' });
     } finally {
       setLoading(false);
     }

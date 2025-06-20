@@ -25,7 +25,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadTemplatesFromBackend = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/templates');
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (!apiBaseUrl) {
+        throw new Error('VITE_API_BASE_URL environment variable is not configured');
+      }
+      const response = await fetch(`${apiBaseUrl}api/templates`);
       if (response.ok) {
         const data = await response.json();
         setTemplates(data.templates || []);
@@ -44,7 +48,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const saveTemplateToBackend = async (template: CertificateTemplate) => {
     try {
-      const response = await fetch('http://localhost:3001/api/templates/sync', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (!apiBaseUrl) {
+        throw new Error('VITE_API_BASE_URL environment variable is not configured');
+      }
+      const response = await fetch(`${apiBaseUrl}api/templates/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -106,7 +114,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Remove from backend by syncing all templates except the deleted one
       const remainingTemplates = templates.filter(t => t.id !== id);
       
-      const response = await fetch('http://localhost:3001/api/templates/sync', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (!apiBaseUrl) {
+        throw new Error('VITE_API_BASE_URL environment variable is not configured');
+      }
+      const response = await fetch(`${apiBaseUrl}api/templates/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

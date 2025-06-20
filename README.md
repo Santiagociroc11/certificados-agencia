@@ -55,9 +55,9 @@ npm run build
 
 ## 🌐 URLs de Desarrollo
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3001
-- **Health Check**: http://localhost:3001/api/health
+- **Frontend**: http://localhost:5173 (desarrollo) / https://certificados.automscc.com/ (producción)
+- **Backend API**: http://localhost:3001 (desarrollo) / https://certificados.automscc.com/ (producción)
+- **Health Check**: http://localhost:3001/api/health (desarrollo) / https://certificados.automscc.com/api/health (producción)
 
 ## 📖 Cómo Usar la Plataforma
 
@@ -83,7 +83,7 @@ npm run build
 
 #### Endpoint Principal
 ```
-POST http://localhost:3001/api/certificates/generate
+POST https://certificados.automscc.com/api/certificates/generate
 ```
 
 #### Ejemplo de Request
