@@ -1,46 +1,44 @@
 # ==> Stage 1: Build Frontend Assets <==
 FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency definitions
+# Copy dependency definitions first to leverage Docker cache
 COPY package.json package-lock.json ./
 
-# Install project dependencies
+# Install all dependencies for building the frontend
 RUN npm install
 
-# Copy all source files
+# Copy the rest of the source code
 COPY . .
 
-# Generate the static build of the React frontend
-# This will create a 'dist' folder with optimized assets
+# Build the frontend
 RUN npm run build
 
 
 # ==> Stage 2: Setup Production Server <==
-FROM node:18-alpine
+FROM node:18-alpine AS production
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency definitions from builder stage
+# Install Alpine-specific dependencies, including the lightweight Chromium browser
+RUN apk add --no-cache udev ttf-freefont chromium
+
+# Tell Puppeteer to skip downloading Chromium. We're using the one from apk.
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Copy dependency definitions
 COPY --from=builder /app/package.json /app/package-lock.json ./
 
-# Install only production dependencies to keep the image small
-# This will skip devDependencies like vite, react, etc.
+# Install only production dependencies. This will be much faster.
 RUN npm install --omit=dev
 
-# Copy server-related files from builder stage
+# Copy the server code and the built frontend from the builder stage
 COPY --from=builder /app/server ./server
-
-# Copy the built frontend assets from the builder stage
-# The server will serve these static files
 COPY --from=builder /app/dist ./dist
 
-# The backend server runs on port 3001
 EXPOSE 3001
 
-# Command to start the production server
-# This should run the Express server which serves the API and the built frontend
+# Start the server
 CMD [ "node", "server/index.js" ] 

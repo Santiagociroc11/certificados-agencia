@@ -30,9 +30,10 @@ export async function generateCertificatePDF(template, data, certificateId) {
 
     let browser;
     try {
-        // Launch Puppeteer browser
+        // Launch Puppeteer browser, pointing to the installed Chromium
         browser = await puppeteer.launch({
             headless: 'new',
+            executablePath: '/usr/bin/chromium-browser', // Path for Alpine Chromium
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
