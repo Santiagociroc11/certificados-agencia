@@ -97,10 +97,18 @@ export async function generateCertificatePDF(template, data, certificateId) {
         });
         console.log(`[PDF_GEN] PDF successfully written to disk at: ${pdfPath}`);
 
-        const publicUrl = `${process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3001}`}/certificates/certificate_${certificateId}.pdf`;
+        // Construct the public URL for the certificate
+        const baseUrl = process.env.PUBLIC_BASE_URL;
+        if (!baseUrl) {
+            console.warn('[PDF_GEN] WARNING: PUBLIC_BASE_URL environment variable is not set. Using localhost fallback.');
+        }
+        const publicUrl = `${baseUrl || `http://localhost:${process.env.PORT || 3001}`}/certificates/certificate_${certificateId}.pdf`;
         console.log(`[PDF_GEN] Generated download URL: ${publicUrl}`);
 
-        return { pdfPath, publicUrl };
+        return { 
+            filePath: pdfPath, 
+            downloadUrl: publicUrl 
+        };
     } catch (error) {
         console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         console.error('!!! [PDF_GEN_ERROR] A critical error occurred during PDF generation !!!');

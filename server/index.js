@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -66,6 +67,12 @@ app.use('*', (req, res) => {
 // Start server function
 const startServer = async () => {
     try {
+        // Log environment variables for debugging
+        console.log('🔧 Environment Variables:');
+        console.log('   PORT:', process.env.PORT || 'not set');
+        console.log('   PUBLIC_BASE_URL:', process.env.PUBLIC_BASE_URL || 'not set');
+        console.log('   NODE_ENV:', process.env.NODE_ENV || 'not set');
+        
         await initializeBrowser();
         console.log('✅ Browser initialized successfully.');
 
