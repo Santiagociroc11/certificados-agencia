@@ -19,6 +19,10 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Static files for generated certificates
 app.use('/certificates', express.static(path.join(__dirname, 'generated')));
 
+// Static Frontend Hosting
+const frontendDistPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(frontendDistPath));
+
 // Routes
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/templates', templateRoutes);
@@ -30,6 +34,13 @@ app.get('/api/health', (req, res) => {
         message: 'Certificate Generator API is running',
         timestamp: new Date().toISOString()
     });
+});
+
+// This catch-all route should be placed AFTER all API routes
+// It sends the 'index.html' file for any request that doesn't match an API endpoint,
+// enabling client-side routing in React.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // Error handling middleware
