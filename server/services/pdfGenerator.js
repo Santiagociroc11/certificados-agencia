@@ -26,14 +26,17 @@ async function ensureDirectoryExists() {
  * @returns {Object} Result with file path and download URL
  */
 export async function generateCertificatePDF(template, data, certificateId) {
+    console.log(`[PDF_GEN] Starting certificate generation for ID: ${certificateId}`);
+    
     await ensureDirectoryExists();
+    console.log('[PDF_GEN] Temp directories ensured.');
 
     let browser;
     try {
-        // Launch Puppeteer browser, pointing to the installed Chromium
+        console.log('[PDF_GEN] Launching Puppeteer browser...');
         browser = await puppeteer.launch({
             headless: 'new',
-            executablePath: '/usr/bin/chromium-browser', // Path for Alpine Chromium
+            executablePath: '/usr/bin/chromium-browser',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -42,31 +45,36 @@ export async function generateCertificatePDF(template, data, certificateId) {
                 '--allow-running-insecure-content'
             ]
         });
+        console.log('[PDF_GEN] Puppeteer browser launched successfully.');
 
         const page = await browser.newPage();
+        console.log('[PDF_GEN] New page created.');
         
-        // Match viewport to editor canvas size for 1:1 mapping
         await page.setViewport({
             width: 794,
             height: 561,
-            deviceScaleFactor: 2 // Use scale factor for high resolution text
+            deviceScaleFactor: 2
         });
+        console.log('[PDF_GEN] Viewport set.');
 
-        // Generate HTML for the certificate
+        console.log('[PDF_GEN] Generating certificate HTML...');
         const html = generateCertificateHTML(template, data);
+        console.log('[PDF_GEN] HTML generated successfully.');
         
-        // Set the HTML content
+        console.log('[PDF_GEN] Setting page content...');
         await page.setContent(html, {
             waitUntil: ['networkidle0', 'load'],
-            timeout: 30000
+            timeout: 60000 // Increased timeout just in case
         });
+        console.log('[PDF_GEN] Page content set.');
 
-        // IMPORTANT: Wait for all fonts to be loaded and ready
+        console.log('[PDF_GEN] Waiting for fonts to be ready...');
         await page.evaluateHandle('document.fonts.ready');
+        console.log('[PDF_GEN] Fonts are ready.');
 
-        // Generate PDF
         const filename = `certificate_${certificateId}.pdf`;
         const filePath = path.join(GENERATED_DIR, filename);
+        console.log(`[PDF_GEN] Preparing to write PDF to: ${filePath}`);
         
         await page.pdf({
             path: filePath,
@@ -75,23 +83,27 @@ export async function generateCertificatePDF(template, data, certificateId) {
             printBackground: true,
             pageRanges: '1'
         });
+        console.log(`[PDF_GEN] PDF successfully written to disk at: ${filePath}`);
 
-        // Use environment variable for the base URL, with a fallback for local dev
         const publicBaseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3001';
         const downloadUrl = `${publicBaseUrl}/certificates/${filename}`;
+        console.log(`[PDF_GEN] Generated download URL: ${downloadUrl}`);
 
-        return {
-            filePath,
-            downloadUrl,
-            filename
-        };
+        return { filePath, downloadUrl, filename };
 
     } catch (error) {
-        console.error('PDF generation error:', error);
+        console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        console.error('!!! [PDF_GEN_ERROR] A critical error occurred during PDF generation !!!');
+        console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        console.error('Error Message:', error.message);
+        console.error('Error Stack:', error.stack);
+        console.error('Full Error Object:', JSON.stringify(error, null, 2));
         throw new Error(`Failed to generate PDF: ${error.message}`);
     } finally {
         if (browser) {
+            console.log('[PDF_GEN] Closing browser...');
             await browser.close();
+            console.log('[PDF_GEN] Browser closed.');
         }
     }
 }
