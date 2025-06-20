@@ -1,19 +1,33 @@
 import { fabric } from 'fabric';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createCanvas, registerFont } from 'node-canvas';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Helper to load image from URL or local path into a buffer
-async function loadImage(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch image from ${url}: ${response.statusText}`);
+// Register fonts on server startup
+try {
+    const regularFontPath = path.join(__dirname, '../assets/fonts/Poppins-Regular.woff2');
+    const boldFontPath = path.join(__dirname, '../assets/fonts/Poppins-Bold.woff2');
+
+    if (fs.existsSync(regularFontPath)) {
+        registerFont(regularFontPath, { family: 'Poppins', weight: 'normal' });
+        console.log('[FONT_LOADER] Registered Poppins Regular font.');
+    } else {
+        console.warn('[FONT_LOADER] Poppins-Regular.woff2 not found. Text might not render correctly.');
     }
-    return Buffer.from(await response.arrayBuffer());
+
+    if (fs.existsSync(boldFontPath)) {
+        registerFont(boldFontPath, { family: 'Poppins', weight: 'bold' });
+        console.log('[FONT_LOADER] Registered Poppins Bold font.');
+    } else {
+        console.warn('[FONT_LOADER] Poppins-Bold.woff2 not found. Text might not render correctly.');
+    }
+} catch (error) {
+    console.error('[FONT_LOADER] Critical error registering fonts:', error);
 }
 
 // Main generation function
@@ -23,25 +37,25 @@ export async function generateCertificate(template, data, certificateId) {
     const width = parseInt(template.width) || 800;
     const height = parseInt(template.height) || 600;
 
-    // Create a virtual canvas
-    const canvas = new fabric.StaticCanvas(null, { width, height });
+    // Create a virtual canvas using node-canvas
+    const canvas = createCanvas(width, height);
+    const fabricCanvas = new fabric.StaticCanvas(canvas);
 
     // Handle background
     const backgroundUrl = template.backgroundUrl || template.background?.value;
     if (backgroundUrl) {
         try {
             const bgImage = await fabric.Image.fromURL(backgroundUrl);
-            canvas.setBackgroundImage(bgImage, canvas.renderAll.bind(canvas), {
+            fabricCanvas.setBackgroundImage(bgImage, fabricCanvas.renderAll.bind(fabricCanvas), {
                 scaleX: width / bgImage.width,
                 scaleY: height / bgImage.height,
             });
         } catch (error) {
             console.error(`[FABRIC_GEN] Failed to load background image: ${error.message}`);
-            // Fallback to color if image fails
-            canvas.backgroundColor = template.backgroundColor || '#FFFFFF';
+            fabricCanvas.backgroundColor = template.backgroundColor || '#FFFFFF';
         }
     } else {
-        canvas.backgroundColor = template.backgroundColor || '#FFFFFF';
+        fabricCanvas.backgroundColor = template.backgroundColor || '#FFFFFF';
     }
 
     // Add elements to canvas
@@ -73,13 +87,15 @@ export async function generateCertificate(template, data, certificateId) {
 
         if (element.type === 'text') {
             const textbox = new fabric.Textbox(content, config);
-            canvas.add(textbox);
+            fabricCanvas.add(textbox);
         } else if (element.type === 'image') {
             try {
                 const imageUrl = element.content || element.src;
                 if (imageUrl) {
-                    const img = await fabric.Image.fromURL(imageUrl, config);
-                    canvas.add(img);
+                    const img = await fabric.Image.fromURL(imageUrl);
+                    // Scale image to fit its defined box
+                    img.set({ ...config, scaleX: config.width / img.width, scaleY: config.height / img.height });
+                    fabricCanvas.add(img);
                 }
             } catch (error) {
                 console.error(`[FABRIC_GEN] Failed to load element image: ${error.message}`);
@@ -88,9 +104,8 @@ export async function generateCertificate(template, data, certificateId) {
     }
 
     // Render canvas and get PNG data
-    canvas.renderAll();
-    const dataUrl = canvas.toDataURL({ format: 'png', multiplier: 2 });
-    const imageBuffer = Buffer.from(dataUrl.replace(/^data:image\/png;base64,/, ''), 'base64');
+    fabricCanvas.renderAll();
+    const imageBuffer = canvas.toBuffer('image/png');
     
     // Create PDF
     const pdfDoc = await PDFDocument.create();

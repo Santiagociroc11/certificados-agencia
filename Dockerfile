@@ -37,6 +37,9 @@ RUN npm install --omit=dev
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/dist ./dist
 
+# Copy fonts for node-canvas
+COPY --from=builder /app/server/assets/fonts /app/server/assets/fonts
+
 # Create directories and set correct ownership for the node user.
 # This is crucial for allowing the app to write to persistent volumes.
 RUN mkdir -p /app/server/data && \
