@@ -181,24 +181,24 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
             });
         }
 
-        // Handle both old and new template formats
         const x = element.position?.x || element.x || 0;
         const y = element.position?.y || element.y || 0;
         const width = element.size?.width || element.width || 100;
         const height = element.size?.height || element.height || 30;
         
-
-        
         const style = element.style || {};
-        // Use exact positioning without flexbox to match canvas behavior
-        const styles = `
+        const fontSize = style.fontSize || element.fontSize || 16;
+        
+        const paddingTop = element.type === 'text' ? Math.round(fontSize * 0.15) : 0;
+
+        let styles = `
             position: absolute;
             left: ${x}px;
             top: ${y}px;
             width: ${width}px;
             height: ${height}px;
             font-family: '${style.fontFamily || element.fontFamily || 'Arial'}', sans-serif;
-            font-size: ${style.fontSize || element.fontSize || 16}px;
+            font-size: ${fontSize}px;
             color: ${style.color || element.fill || '#000000'};
             font-weight: ${style.fontWeight || element.fontWeight || 'normal'};
             font-style: ${style.fontStyle || element.fontStyle || 'normal'};
@@ -210,11 +210,11 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
             transform-origin: center center;
             box-sizing: border-box;
             margin: 0;
-            padding: 0;
-            ${element.type === 'image' ? 'object-fit: cover;' : ''}
+            padding: ${paddingTop}px 0 0 0;
         `;
 
         if (element.type === 'image') {
+            styles += 'object-fit: cover; padding: 0;';
             const src = element.content || element.src || '';
             return `<img src="${src}" style="${styles}" />`;
         }
