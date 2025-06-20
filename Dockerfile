@@ -41,6 +41,13 @@ RUN npm install --omit=dev
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/dist ./dist
 
+# Create directories and set correct ownership for the node user.
+# This is crucial for allowing the app to write to persistent volumes.
+RUN mkdir -p /app/server/data && \
+    mkdir -p /app/server/generated && \
+    chown -R node:node /app/server/data && \
+    chown -R node:node /app/server/generated
+
 EXPOSE 3001
 
 # Start the server
