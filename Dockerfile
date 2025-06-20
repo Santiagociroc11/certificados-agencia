@@ -3,6 +3,9 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Install build-time dependencies for node-canvas, needed for `npm install`
+RUN apk add --no-cache build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
+
 # Copy dependency definitions first to leverage Docker cache
 COPY package.json package-lock.json ./
 
@@ -21,8 +24,8 @@ FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Install dependencies for node-canvas (used by Fabric.js on the server)
-RUN apk add --no-cache build-base cairo-dev pango-dev libjpeg-turbo-dev giflib-dev
+# Install RUNTIME dependencies for node-canvas
+RUN apk add --no-cache cairo jpeg pango giflib
 
 # Environment variables will be set by Easypanel
 # No default values to ensure proper configuration
