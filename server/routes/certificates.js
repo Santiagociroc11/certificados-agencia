@@ -1,6 +1,6 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { generateCertificatePDF } from '../services/pdfGenerator.js';
+import { generateCertificate } from '../services/certificateGenerator.js';
 import { loadTemplate } from '../services/templateService.js';
 import { saveCertificateRecord } from '../services/certificateStorage.js';
 
@@ -39,7 +39,7 @@ router.post('/generate', async (req, res) => {
         const validationCode = uuidv4().substring(0, 8).toUpperCase();
 
         // Generate PDF
-        const pdfResult = await generateCertificatePDF(template, data, certificateId);
+        const pdfResult = await generateCertificate(template, data, certificateId);
         
         // Create certificate record
         const certificateRecord = {
@@ -201,7 +201,7 @@ async function generateSingleCertificate(templateId, data, recipientName) {
     const certificateId = uuidv4();
     const validationCode = uuidv4().substring(0, 8).toUpperCase();
     
-    const pdfResult = await generateCertificatePDF(template, data, certificateId);
+    const pdfResult = await generateCertificate(template, data, certificateId);
     
     const certificateRecord = {
         id: certificateId,

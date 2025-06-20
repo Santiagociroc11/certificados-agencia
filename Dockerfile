@@ -21,12 +21,8 @@ FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Install Alpine-specific dependencies, including the lightweight Chromium browser
-RUN apk add --no-cache udev ttf-freefont chromium
-
-# Tell Puppeteer to skip downloading Chromium. We're using the one from apk.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Install dependencies for node-canvas (used by Fabric.js on the server)
+RUN apk add --no-cache build-base cairo-dev pango-dev libjpeg-turbo-dev giflib-dev
 
 # Environment variables will be set by Easypanel
 # No default values to ensure proper configuration
