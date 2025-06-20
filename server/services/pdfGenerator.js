@@ -33,7 +33,7 @@ export async function generateCertificatePDF(template, data, certificateId) {
 
     let browser;
     try {
-        console.log('[PDF_GEN] Launching Puppeteer browser with compatibility args...');
+        console.log('[PDF_GEN] Launching Puppeteer browser with updated compatibility args...');
         browser = await puppeteer.launch({
             headless: 'new',
             executablePath: '/usr/bin/chromium-browser',
@@ -41,11 +41,8 @@ export async function generateCertificatePDF(template, data, certificateId) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process',
-                '--disable-gpu'
+                '--disable-gpu',
+                '--disable-features=site-per-process'
             ]
         });
         console.log('[PDF_GEN] Puppeteer browser launched successfully.');
