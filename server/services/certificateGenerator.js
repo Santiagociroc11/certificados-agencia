@@ -3,7 +3,7 @@ import { PDFDocument } from 'pdf-lib';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createCanvas, registerFont } from 'node-canvas';
+import { createCanvas, registerFont } from 'canvas';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
