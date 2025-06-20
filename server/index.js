@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import certificateRoutes from './routes/certificates.js';
 import templateRoutes from './routes/templates.js';
+import { initializeBrowser, closeBrowser } from './services/pdfGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,10 +63,38 @@ app.use('*', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Certificate Generator API running on http://localhost:${PORT}`);
-    console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`📝 API Docs: http://localhost:${PORT}/api/certificates (POST)`);
-});
+// Start server function
+const startServer = async () => {
+    try {
+        await initializeBrowser();
+        console.log('✅ Browser initialized successfully.');
+
+        const server = app.listen(PORT, () => {
+            console.log(`🚀 Certificate Generator API running on http://localhost:${PORT}`);
+            console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
+            console.log(`📝 API Docs: http://localhost:${PORT}/api/certificates (POST)`);
+        });
+
+        // Graceful shutdown
+        const gracefulShutdown = (signal) => {
+            console.log(`\n🚨 Received ${signal}. Shutting down gracefully...`);
+            server.close(async () => {
+                console.log('✅ HTTP server closed.');
+                await closeBrowser();
+                console.log('✅ Puppeteer browser closed.');
+                process.exit(0);
+            });
+        };
+        
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+    } catch (error) {
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+startServer();
 
 export default app; 
