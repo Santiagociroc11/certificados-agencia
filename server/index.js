@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -63,9 +64,10 @@ app.use('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Certificate Generator API running on http://localhost:${PORT}`);
-    console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`📝 API Docs: http://localhost:${PORT}/api/certificates (POST)`);
+    const baseUrl = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
+    console.log(`🚀 Certificate Generator API running on ${baseUrl}`);
+    console.log(`📋 Health check: ${baseUrl}/api/health`);
+    console.log(`📝 API Docs: ${baseUrl}/api/certificates (POST)`);
 });
 
 export default app; 

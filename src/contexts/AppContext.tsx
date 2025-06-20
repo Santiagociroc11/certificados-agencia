@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CertificateTemplate } from '../types';
+import { API_URL } from '../config';
 
 interface AppContextType {
   templates: CertificateTemplate[];
@@ -25,7 +26,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadTemplatesFromBackend = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/templates');
+      const response = await fetch(`${API_URL}/templates`);
       if (response.ok) {
         const data = await response.json();
         setTemplates(data.templates || []);
@@ -44,7 +45,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const saveTemplateToBackend = async (template: CertificateTemplate) => {
     try {
-      const response = await fetch('http://localhost:3001/api/templates/sync', {
+      const response = await fetch(`${API_URL}/templates/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -106,7 +107,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Remove from backend by syncing all templates except the deleted one
       const remainingTemplates = templates.filter(t => t.id !== id);
       
-      const response = await fetch('http://localhost:3001/api/templates/sync', {
+      const response = await fetch(`${API_URL}/templates/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

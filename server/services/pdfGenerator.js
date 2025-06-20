@@ -85,8 +85,7 @@ export async function generateCertificatePDF(template, data, certificateId) {
         });
         console.log(`[PDF_GEN] PDF successfully written to disk at: ${filePath}`);
 
-        const publicBaseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3001';
-        const downloadUrl = `${publicBaseUrl}/certificates/${filename}`;
+        const downloadUrl = `${PUBLIC_BASE_URL}/certificates/${filename}`;
         console.log(`[PDF_GEN] Generated download URL: ${downloadUrl}`);
 
         return { filePath, downloadUrl, filename };
