@@ -70,11 +70,16 @@ export async function generateCertificatePDF(template, data, certificateId) {
         page = await browser.newPage();
         console.log('[PDF_GEN] New page created.');
 
-        await page.setViewport({ width: template.width, height: template.height });
+        // Ensure we have valid dimensions, use defaults if not provided
+        const width = parseInt(template.width) || 800;
+        const height = parseInt(template.height) || 600;
+        
+        console.log(`[PDF_GEN] Setting viewport to: ${width}x${height}`);
+        await page.setViewport({ width, height });
         console.log('[PDF_GEN] Viewport set.');
 
         console.log('[PDF_GEN] Generating certificate HTML...');
-        const htmlContent = generateCertificateHTML(template, data);
+        const htmlContent = generateCertificateHTML(template, data, width, height);
         console.log('[PDF_GEN] HTML generated successfully.');
 
         console.log('[PDF_GEN] Setting page content...');
@@ -90,8 +95,8 @@ export async function generateCertificatePDF(template, data, certificateId) {
 
         await page.pdf({
             path: pdfPath,
-            width: `${template.width}px`,
-            height: `${template.height}px`,
+            width: `${width}px`,
+            height: `${height}px`,
             printBackground: true,
             pageRanges: '1',
         });
@@ -127,10 +132,10 @@ export async function generateCertificatePDF(template, data, certificateId) {
     }
 }
 
-function generateCertificateHTML(template, data) {
+function generateCertificateHTML(template, data, width = 800, height = 600) {
     const googleFonts = template.elements
-        .filter(el => el.type === 'text' && el.fontFamily)
-        .map(el => el.fontFamily)
+        .filter(el => el.type === 'text' && el.style?.fontFamily)
+        .map(el => el.style.fontFamily)
         .filter((value, index, self) => self.indexOf(value) === index);
 
     const fontLinks = googleFonts.map(font => 
@@ -138,17 +143,27 @@ function generateCertificateHTML(template, data) {
     ).join('\n');
 
     let bodyStyles = `
-        width: ${template.width}px;
-        height: ${template.height}px;
+        width: ${width}px;
+        height: ${height}px;
         margin: 0;
         padding: 0;
         position: relative;
         overflow: hidden;
     `;
 
-    if (template.background.type === 'color') {
+    // Handle background (check both old and new template formats)
+    if (template.backgroundColor) {
+        bodyStyles += `background-color: ${template.backgroundColor};`;
+    } else if (template.backgroundUrl) {
+        bodyStyles += `
+            background-image: url('${template.backgroundUrl}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        `;
+    } else if (template.background?.type === 'color') {
         bodyStyles += `background-color: ${template.background.value};`;
-    } else {
+    } else if (template.background?.value) {
         bodyStyles += `
             background-image: url('${template.background.value}');
             background-size: cover;
@@ -158,7 +173,7 @@ function generateCertificateHTML(template, data) {
     }
 
     const elementsHTML = template.elements.map(element => {
-        let content = element.text || '';
+        let content = element.content || element.text || '';
         if (element.type === 'text') {
             const regex = /\{(.+?)\}/g;
             content = content.replace(regex, (match, variable) => {
@@ -166,30 +181,38 @@ function generateCertificateHTML(template, data) {
             });
         }
 
+        // Handle both old and new template formats
+        const x = element.position?.x || element.x || 0;
+        const y = element.position?.y || element.y || 0;
+        const width = element.size?.width || element.width || 100;
+        const height = element.size?.height || element.height || 30;
+        
+        const style = element.style || {};
         const styles = `
             position: absolute;
-            left: ${element.x}px;
-            top: ${element.y}px;
-            width: ${element.width}px;
-            height: ${element.height}px;
-            font-family: '${element.fontFamily}', sans-serif;
-            font-size: ${element.fontSize}px;
-            color: ${element.fill};
-            font-weight: ${element.fontWeight || 'normal'};
-            font-style: ${element.fontStyle || 'normal'};
-            text-decoration: ${element.textDecoration || 'none'};
-            line-height: ${element.lineHeight || 1.2};
-            letter-spacing: ${element.charSpacing ? element.charSpacing / 1000 : 0}em;
-            text-align: ${element.textAlign || 'left'};
+            left: ${x}px;
+            top: ${y}px;
+            width: ${width}px;
+            height: ${height}px;
+            font-family: '${style.fontFamily || element.fontFamily || 'Arial'}', sans-serif;
+            font-size: ${style.fontSize || element.fontSize || 16}px;
+            color: ${style.color || element.fill || '#000000'};
+            font-weight: ${style.fontWeight || element.fontWeight || 'normal'};
+            font-style: ${style.fontStyle || element.fontStyle || 'normal'};
+            text-decoration: ${style.textDecoration || element.textDecoration || 'none'};
+            line-height: ${style.lineHeight || element.lineHeight || 1.2};
+            letter-spacing: ${style.letterSpacing ? style.letterSpacing / 1000 : (element.charSpacing ? element.charSpacing / 1000 : 0)}em;
+            text-align: ${style.textAlign || element.textAlign || 'left'};
             transform: rotate(${element.angle || 0}deg);
             transform-origin: center center;
             display: flex;
             align-items: center;
-            justify-content: center; /* Simplifies centering */
+            justify-content: center;
         `;
 
         if (element.type === 'image') {
-            return `<img src="${element.src}" style="${styles} object-fit: cover;" />`;
+            const src = element.content || element.src || '';
+            return `<img src="${src}" style="${styles} object-fit: cover;" />`;
         }
         
         return `<div style="${styles}">${content}</div>`;
