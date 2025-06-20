@@ -94,7 +94,7 @@ export default function PropertiesPanel({ canvas, selectedObject, template, onTe
       if(canvas && selectedObject) {
         canvas.remove(selectedObject);
         canvas.discardActiveObject();
-      }
+    }
     }
     
     const obj = selectedObject;
@@ -102,7 +102,7 @@ export default function PropertiesPanel({ canvas, selectedObject, template, onTe
   return (
         <div className="p-2 h-full">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Propiedades</h3>
-            
+      
             {!obj ? (
                 <Section title="Plantilla">
                     <PropertyInput label="Nombre" value={template.name || ''} onChange={val => onTemplateUpdate({name: val})} />
@@ -261,7 +261,7 @@ export default function PropertiesPanel({ canvas, selectedObject, template, onTe
                       </button>
         </div>
                 </>
-            )}
+        )}
     </div>
   );
 }
