@@ -187,11 +187,16 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
         const width = element.size?.width || element.width || 100;
         const height = element.size?.height || element.height || 30;
         
+        // Apply a small adjustment for text elements to better match canvas positioning
+        const fontSize = element.style?.fontSize || element.fontSize || 16;
+        const adjustedY = element.type === 'text' ? y - (fontSize * 0.15) : y;
+        
         const style = element.style || {};
-        const styles = `
+        // For text elements, we need to handle positioning more precisely
+        let elementStyles = `
             position: absolute;
             left: ${x}px;
-            top: ${y}px;
+            top: ${adjustedY}px;
             width: ${width}px;
             height: ${height}px;
             font-family: '${style.fontFamily || element.fontFamily || 'Arial'}', sans-serif;
@@ -205,10 +210,27 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
             text-align: ${style.textAlign || element.textAlign || 'left'};
             transform: rotate(${element.angle || 0}deg);
             transform-origin: center center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            box-sizing: border-box;
         `;
+
+        // Different positioning strategy for text vs images
+        if (element.type === 'text') {
+            // For text, use flexbox but adjust the positioning to match canvas behavior
+            elementStyles += `
+                display: flex;
+                align-items: flex-start;
+                justify-content: ${style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start'};
+            `;
+        } else {
+            // For images, use standard flexbox centering
+            elementStyles += `
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+        }
+
+        const styles = elementStyles;
 
         if (element.type === 'image') {
             const src = element.content || element.src || '';
