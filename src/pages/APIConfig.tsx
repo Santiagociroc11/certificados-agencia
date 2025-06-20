@@ -586,7 +586,7 @@ export default function APIGenerator() {
                           className="w-full p-2 mt-1 border border-gray-300 rounded-md"
                           placeholder={`Valor para {${varName}}`}
                         />
-                      </div>
+                  </div>
                     ))}
                     {requiredVariables.length === 0 && <p className="text-sm text-gray-500">Esta plantilla no tiene variables.</p>}
                 </div>

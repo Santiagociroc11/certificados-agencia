@@ -3,8 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { generateCertificatePDF } from '../services/pdfGenerator.js';
 import { loadTemplate } from '../services/templateService.js';
 import { saveCertificateRecord } from '../services/certificateStorage.js';
+import pLimit from 'p-limit';
 
 const router = express.Router();
+
+// Limit concurrency to 1. Only one PDF will be generated at a time.
+const limit = pLimit(1);
 
 // POST /api/certificates/generate
 // Generate a certificate from a template with dynamic data
@@ -34,39 +38,55 @@ router.post('/generate', async (req, res) => {
             });
         }
 
-        // Generate unique IDs
-        const certificateId = uuidv4();
-        const validationCode = uuidv4().substring(0, 8).toUpperCase();
+        // Wrap the entire generation process in the limiter
+        const generationPromise = limit(async () => {
+            console.log('[QUEUE] Picked a new certificate request from the queue. Starting processing...');
+            const certificateId = uuidv4();
+            
+            const pdfResult = await generateCertificatePDF(template, data, certificateId);
+            
+            const certificateRecord = {
+                id: certificateId,
+                templateId: template_id,
+                recipientName: recipient_name || data.nombre_completo || data.name || 'Unknown',
+                data,
+                generatedAt: new Date().toISOString(),
+                validationCode: uuidv4().substring(0, 8).toUpperCase(),
+                status: 'generated',
+                downloadUrl: pdfResult.downloadUrl,
+                filePath: pdfResult.filePath
+            };
+            
+            await saveCertificateRecord(certificateRecord);
+            console.log(`[QUEUE] Finished processing for certificate ${certificateId}.`);
+            
+            return {
+                success: true,
+                certificate: {
+                    id: certificateId,
+                    validation_code: certificateRecord.validationCode,
+                    download_url: pdfResult.downloadUrl,
+                    recipient_name: certificateRecord.recipientName,
+                    generated_at: certificateRecord.generatedAt,
+                    template_id: template_id
+                },
+                message: 'Certificate generated successfully'
+            };
+        });
 
-        // Generate PDF
-        const pdfResult = await generateCertificatePDF(template, data, certificateId);
+        // The request is now in the queue. We await its completion.
+        const result = await generationPromise;
         
-        // Create certificate record
-        const certificateRecord = {
-            id: certificateId,
-            templateId: template_id,
-            recipientName: recipient_name || data.nombre_completo || data.name || 'Unknown',
-            data: data,
-            generatedAt: new Date(),
-            validationCode: validationCode,
-            status: 'generated',
-            downloadUrl: pdfResult.downloadUrl,
-            filePath: pdfResult.filePath
-        };
-
-        // Save certificate record
-        await saveCertificateRecord(certificateRecord);
-
         // Call webhook if provided
         if (webhook_url) {
             try {
                 const webhookPayload = {
-                    certificate_id: certificateId,
-                    validation_code: validationCode,
-                    download_url: pdfResult.downloadUrl,
-                    recipient_name: certificateRecord.recipientName,
-                    generated_at: certificateRecord.generatedAt,
-                    template_id: template_id,
+                    certificate_id: result.certificate.id,
+                    validation_code: result.certificate.validation_code,
+                    download_url: result.certificate.download_url,
+                    recipient_name: result.certificate.recipient_name,
+                    generated_at: result.certificate.generated_at,
+                    template_id: result.certificate.template_id,
                     status: 'success'
                 };
 
@@ -83,27 +103,11 @@ router.post('/generate', async (req, res) => {
             }
         }
 
-        // Success response
-        res.status(201).json({
-            success: true,
-            certificate: {
-                id: certificateId,
-                validation_code: validationCode,
-                download_url: pdfResult.downloadUrl,
-                recipient_name: certificateRecord.recipientName,
-                generated_at: certificateRecord.generatedAt,
-                template_id: template_id
-            },
-            message: 'Certificate generated successfully'
-        });
+        res.status(201).json(result);
 
     } catch (error) {
-        console.error('Certificate generation error:', error);
-        res.status(500).json({
-            error: 'Failed to generate certificate',
-            message: error.message,
-            timestamp: new Date().toISOString()
-        });
+        console.error('Certificate generation error:', error.message, error.stack);
+        res.status(500).json({ error: 'Failed to generate certificate', details: error.message });
     }
 });
 
