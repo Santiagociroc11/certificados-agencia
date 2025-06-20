@@ -19,7 +19,6 @@
     "dotenv": "^16.5.0",
     "express": "^4.19.2",
     "fabric": "^5.3.0",
-    "fs-extra": "^11.3.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "lucide-react": "^0.417.0",
