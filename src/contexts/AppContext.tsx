@@ -25,10 +25,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadTemplatesFromBackend = async () => {
     setLoading(true);
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-      if (!apiBaseUrl) {
-        throw new Error('VITE_API_BASE_URL environment variable is not configured');
-      }
+      // In production, use the current origin. In development, use env var
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (typeof window !== 'undefined' ? window.location.origin + '/' : '');
       const response = await fetch(`${apiBaseUrl}api/templates`);
       if (response.ok) {
         const data = await response.json();
@@ -48,10 +47,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const saveTemplateToBackend = async (template: CertificateTemplate) => {
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-      if (!apiBaseUrl) {
-        throw new Error('VITE_API_BASE_URL environment variable is not configured');
-      }
+      // In production, use the current origin. In development, use env var
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (typeof window !== 'undefined' ? window.location.origin + '/' : '');
       const response = await fetch(`${apiBaseUrl}api/templates/sync`, {
         method: 'POST',
         headers: {
@@ -114,10 +112,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Remove from backend by syncing all templates except the deleted one
       const remainingTemplates = templates.filter(t => t.id !== id);
       
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-      if (!apiBaseUrl) {
-        throw new Error('VITE_API_BASE_URL environment variable is not configured');
-      }
+      // In production, use the current origin. In development, use env var
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (typeof window !== 'undefined' ? window.location.origin + '/' : '');
       const response = await fetch(`${apiBaseUrl}api/templates/sync`, {
         method: 'POST',
         headers: {

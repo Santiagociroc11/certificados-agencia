@@ -86,10 +86,8 @@ const APIDocumentation = () => {
     if (typeof window !== 'undefined') {
       return `${window.location.origin}/api`;
     }
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-    if (!apiBaseUrl) {
-      throw new Error('VITE_API_BASE_URL environment variable is not configured');
-    }
+    // Fallback for SSR or build time
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
     return `${apiBaseUrl}api`;
   };
   const baseUrl = getBaseUrl();
@@ -311,10 +309,8 @@ const APITester = () => {
     if (typeof window !== 'undefined') {
       return window.location.origin;
     }
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-    if (!apiBaseUrl) {
-      throw new Error('VITE_API_BASE_URL environment variable is not configured');
-    }
+    // Fallback for SSR or build time
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
     return apiBaseUrl.replace(/\/$/, '');
   };
   const baseUrl = getBaseUrl();
