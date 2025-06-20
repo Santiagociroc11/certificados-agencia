@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CertificateTemplate } from '../types';
 
 interface AppContextType {
@@ -11,8 +11,6 @@ interface AppContextType {
   refreshTemplates: () => Promise<void>;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
-
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -24,10 +22,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadTemplatesFromBackend();
   }, []);
 
-  const loadTemplatesFromBackend = useCallback(async () => {
+  const loadTemplatesFromBackend = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/templates`);
+      const response = await fetch('http://localhost:3001/api/templates');
       if (response.ok) {
         const data = await response.json();
         setTemplates(data.templates || []);
@@ -42,11 +40,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const saveTemplateToBackend = useCallback(async (template: CertificateTemplate) => {
+  const saveTemplateToBackend = async (template: CertificateTemplate) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/templates/sync`, {
+      const response = await fetch('http://localhost:3001/api/templates/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -63,9 +61,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('Error saving template to backend:', error);
       throw error;
     }
-  }, []);
+  };
 
-  const addTemplate = useCallback(async (template: CertificateTemplate) => {
+  const addTemplate = async (template: CertificateTemplate) => {
     try {
       // Save to backend first
       await saveTemplateToBackend(template);
@@ -78,9 +76,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('Failed to add template:', error);
       throw error;
     }
-  }, [saveTemplateToBackend]);
+  };
 
-  const updateTemplate = useCallback(async (id: string, updates: Partial<CertificateTemplate>) => {
+  const updateTemplate = async (id: string, updates: Partial<CertificateTemplate>) => {
     try {
       // Find the template to update
       const existingTemplate = templates.find(t => t.id === id);
@@ -101,14 +99,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('Failed to update template:', error);
       throw error;
     }
-  }, [templates, saveTemplateToBackend]);
+  };
 
-  const deleteTemplate = useCallback(async (id: string) => {
+  const deleteTemplate = async (id: string) => {
     try {
       // Remove from backend by syncing all templates except the deleted one
       const remainingTemplates = templates.filter(t => t.id !== id);
       
-      const response = await fetch(`${API_BASE_URL}/api/templates/sync`, {
+      const response = await fetch('http://localhost:3001/api/templates/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -128,15 +126,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('Failed to delete template:', error);
       throw error;
     }
-  }, [templates]);
+  };
   
-  const getTemplateById = useCallback((id: string): CertificateTemplate | undefined => {
+  const getTemplateById = (id: string): CertificateTemplate | undefined => {
     return templates.find(t => t.id === id);
-  }, [templates]);
+  };
 
-  const refreshTemplates = useCallback(async () => {
+  const refreshTemplates = async () => {
     await loadTemplatesFromBackend();
-  }, [loadTemplatesFromBackend]);
+  };
 
   return (
     <AppContext.Provider value={{

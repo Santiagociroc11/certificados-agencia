@@ -3,13 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { generateCertificatePDF } from '../services/pdfGenerator.js';
 import { loadTemplate } from '../services/templateService.js';
 import { saveCertificateRecord } from '../services/certificateStorage.js';
-import pLimit from 'p-limit';
 
 const router = express.Router();
-
-// Create a concurrency limiter.
-// This allows a maximum of 2 PDF generations to run at the same time.
-const limit = pLimit(2);
 
 // POST /api/certificates/generate
 // Generate a certificate from a template with dynamic data
@@ -43,17 +38,9 @@ router.post('/generate', async (req, res) => {
         const certificateId = uuidv4();
         const validationCode = uuidv4().substring(0, 8).toUpperCase();
 
-        // Wrap the PDF generation task in the limiter.
-        // If 2 tasks are already running, this will wait until one finishes.
-        const generationTask = limit(async () => {
-            console.log(`[QUEUE] Starting PDF generation for ${certificateId}. Current queue size: ${limit.pendingCount}`);
-            const pdfResult = await generateCertificatePDF(template, data, certificateId);
-            console.log(`[QUEUE] Finished PDF generation for ${certificateId}.`);
-            return pdfResult;
-        });
+        // Generate PDF
+        const pdfResult = await generateCertificatePDF(template, data, certificateId);
         
-        const { downloadUrl, filePath } = await generationTask;
-
         // Create certificate record
         const certificateRecord = {
             id: certificateId,
@@ -63,8 +50,8 @@ router.post('/generate', async (req, res) => {
             generatedAt: new Date(),
             validationCode: validationCode,
             status: 'generated',
-            downloadUrl: downloadUrl,
-            filePath: filePath
+            downloadUrl: pdfResult.downloadUrl,
+            filePath: pdfResult.filePath
         };
 
         // Save certificate record
@@ -76,7 +63,7 @@ router.post('/generate', async (req, res) => {
                 const webhookPayload = {
                     certificate_id: certificateId,
                     validation_code: validationCode,
-                    download_url: downloadUrl,
+                    download_url: pdfResult.downloadUrl,
                     recipient_name: certificateRecord.recipientName,
                     generated_at: certificateRecord.generatedAt,
                     template_id: template_id,
@@ -102,7 +89,7 @@ router.post('/generate', async (req, res) => {
             certificate: {
                 id: certificateId,
                 validation_code: validationCode,
-                download_url: downloadUrl,
+                download_url: pdfResult.downloadUrl,
                 recipient_name: certificateRecord.recipientName,
                 generated_at: certificateRecord.generatedAt,
                 template_id: template_id
@@ -214,17 +201,8 @@ async function generateSingleCertificate(templateId, data, recipientName) {
     const certificateId = uuidv4();
     const validationCode = uuidv4().substring(0, 8).toUpperCase();
     
-    // Wrap the PDF generation task in the limiter.
-    // If 2 tasks are already running, this will wait until one finishes.
-    const generationTask = limit(async () => {
-        console.log(`[QUEUE] Starting PDF generation for ${certificateId}. Current queue size: ${limit.pendingCount}`);
-        const pdfResult = await generateCertificatePDF(template, data, certificateId);
-        console.log(`[QUEUE] Finished PDF generation for ${certificateId}.`);
-        return pdfResult;
-    });
+    const pdfResult = await generateCertificatePDF(template, data, certificateId);
     
-    const { downloadUrl, filePath } = await generationTask;
-
     const certificateRecord = {
         id: certificateId,
         templateId,
@@ -233,8 +211,8 @@ async function generateSingleCertificate(templateId, data, recipientName) {
         generatedAt: new Date(),
         validationCode,
         status: 'generated',
-        downloadUrl: downloadUrl,
-        filePath: filePath
+        downloadUrl: pdfResult.downloadUrl,
+        filePath: pdfResult.filePath
     };
 
     await saveCertificateRecord(certificateRecord);

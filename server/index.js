@@ -5,10 +5,6 @@ import { fileURLToPath } from 'url';
 import certificateRoutes from './routes/certificates.js';
 import templateRoutes from './routes/templates.js';
 import { initializeBrowser, closeBrowser } from './services/pdfGenerator.js';
-import dotenv from 'dotenv';
-
-// Load environment variables from .env file
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
