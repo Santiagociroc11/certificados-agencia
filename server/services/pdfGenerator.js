@@ -15,6 +15,7 @@ const LAUNCH_ARGS = [
     '--disable-features=site-per-process'
 ];
 
+
 export async function initializeBrowser() {
     if (browserInstance) {
         return;
