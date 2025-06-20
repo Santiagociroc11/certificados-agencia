@@ -189,7 +189,7 @@ function generateCertificateHTML(template, data, width = 800, height = 600) {
         const style = element.style || {};
         const fontSize = style.fontSize || element.fontSize || 16;
         
-        const paddingTop = element.type === 'text' ? Math.round(fontSize * 0.15) : 0;
+        const paddingTop = element.type === 'text' ? Math.round(fontSize * 0.2) : 0;
 
         let styles = `
             position: absolute;
